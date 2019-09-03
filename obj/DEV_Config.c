@@ -147,9 +147,9 @@ UBYTE DEV_ModuleInit(void)
     DCPin = new Gpio;
     CSPin = new Gpio;
 
-    pins[7] = DCPin;
-    pins[19] = RSTPin;
-    pins[5] = CSPin;
+    pins[OLED_DC_PIN] = DCPin;
+    pins[OLED_RST_PIN] = RSTPin;
+    pins[OLED_CS_PIN] = CSPin;
 #endif
     return 0;
 }

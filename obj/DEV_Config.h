@@ -52,4 +52,8 @@ void DEV_Delay_ms(UDOUBLE xms);
 void DEV_SPI_WriteByte(UBYTE Value);
 void DEV_SPI_Write_nByte(uint8_t *pData, uint32_t Len);
 
+#define OLED_CS_PIN     19
+#define OLED_DC_PIN     43
+#define OLED_RST_PIN    42
+
 #endif
