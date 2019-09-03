@@ -19,11 +19,12 @@
 uint8_t color_byte[2],color_fill_byte[2];
 
 //uint8_t oled_cs = 8;
-uint8_t oled_cs = 5;
+uint8_t oled_cs = OLED_CS_PIN;
 //uint8_t oled_dc = 24;
-uint8_t oled_dc = 7; // P2_27
+uint8_t oled_dc = OLED_DC_PIN; // P2_27
+//uint8_t oled_dc = 43; // P1_30
 //uint8_t oled_rst= 25;
-uint8_t oled_rst= 19; // P2_29
+uint8_t oled_rst= OLED_RST_PIN; // P2_29
 
 void OLED_CS(uint8_t x) {
   DEV_Digital_Write(oled_cs, x);
@@ -329,7 +330,7 @@ int Device_Init(void) {
         DEV_HARDWARE_SPI_begin((char *)"/dev/spidev1.0");
 
     #elif USE_BELA 
-        DEV_HARDWARE_SPI_begin((char *)"/dev/spidev1.0");
+        DEV_HARDWARE_SPI_beginSet((char *)"/dev/spidev2.1", SPI_MODE0, 24000000);
     #endif
 
   
