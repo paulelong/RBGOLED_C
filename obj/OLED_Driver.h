@@ -2,7 +2,6 @@
 #define __OLED_DRIVER_H__
 
 #include "DEV_Config.h"
-
 #include <stdio.h>
 #include <stdint.h>
 
@@ -50,6 +49,7 @@
 #define YELLOW  0xFFE0
 #define WHITE   0xFFFF
 
+#define SPIBUFSIZE  4096
 
 extern uint8_t color_byte[2];
 extern uint8_t color_fill_byte[2];
@@ -57,6 +57,7 @@ extern uint8_t color_fill_byte[2];
 
 int Device_Init(void);
 void Clear_Screen(void);
+void SendScreenBuffer(void);
 void Fill_Color(uint16_t color);
 void Set_Coordinate(uint16_t x, uint16_t y);
 void Write_text(uint8_t data1);
@@ -77,6 +78,7 @@ void Write_Command(uint8_t data1);
 
 void RAM_Address(void);
 
+void SetPixel(int x, int y, int16_t color);
   
 #endif
 

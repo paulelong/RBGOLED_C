@@ -1,6 +1,5 @@
 #include "OLED_Driver.h"
 
-
 #define INTERFACE_4WIRE_SPI 1
 #define INTERFACE_3WIRE_SPI !(INTERFACE_4WIRE_SPI)
 
@@ -14,17 +13,13 @@
   #error "SPI Setting Error !!"
 #endif
 
-
+int16_t scrbuf[128][128] = {{0},{0}};
 
 uint8_t color_byte[2],color_fill_byte[2];
 
-//uint8_t oled_cs = 8;
 uint8_t oled_cs = OLED_CS_PIN;
-//uint8_t oled_dc = 24;
-uint8_t oled_dc = OLED_DC_PIN; // P2_27
-//uint8_t oled_dc = 43; // P1_30
-//uint8_t oled_rst= 25;
-uint8_t oled_rst= OLED_RST_PIN; // P2_29
+uint8_t oled_dc = OLED_DC_PIN;
+uint8_t oled_rst = OLED_RST_PIN;
 
 void OLED_CS(uint8_t x) {
   DEV_Digital_Write(oled_cs, x);
@@ -195,9 +190,9 @@ void RAM_Address(void)  {
 
 
 void Clear_Screen(void)  {
-  
+
   int i,j;
-  
+
   uint8_t clear_byte[] = {0x00, 0x00};
   RAM_Address();
   Write_Command(0x5C);
@@ -208,11 +203,40 @@ void Clear_Screen(void)  {
     }
   }
 }
+
+void SetPixel(int x, int y, int16_t color)
+{
+  if(x < 0 || x >= 128 || y < 0 || y >= 128)
+  {
+    return;
+  }
+
+  scrbuf[x][y] = color;
+}
   
+void SendScreenBuffer(void)
+{
+  uint8_t cleararray[256] = {0};
+  uint8_t clear_byte[] = {0x00, 0x00};
+
+  RAM_Address();
+  Write_Command(0x5C);
+  
+  OLED_DC(1);
+  OLED_CS(0);
+
+  for(uint8_t *i = (uint8_t *)scrbuf; i < (uint8_t *)&scrbuf[127][127]; i += SPIBUFSIZE)  
+  {
+    DEV_SPI_Write_nByte(i, SPIBUFSIZE); 
+  }
+
+  OLED_CS(1);
+}
 
 void Fill_Color(uint16_t color)  {
   
   int i,j;
+
   RAM_Address();
   Write_Command(0x5C);
   Set_Color(color);
