@@ -4,6 +4,9 @@
 #include <stdlib.h>		//exit()
 #include <signal.h>     //signal()
 
+#include <chrono>
+typedef std::chrono::high_resolution_clock Clock;
+
 void testlines(void);
 void lcdTestPattern(void);
 void testfastlines(void);
@@ -13,7 +16,8 @@ void testfillcircles(uint8_t radius, uint16_t color);
 void testdrawcircles(uint16_t color);
 void testroundrects(void);
 void testtriangles(void);
-
+void buftest(void);
+void DrawDot(int x, int y, int16_t color);
 
 void  Handler(int signo)
 {
@@ -36,8 +40,14 @@ int main(int argc, char **argv)
 
   // Exception handling:ctrl + c
   signal(SIGINT, Handler);
+
   DEV_ModuleInit();
   Device_Init();
+  
+
+  DEV_Delay_ms(20);
+  
+  buftest();
   DEV_Delay_ms(20);
   
   Display_Interface();
@@ -57,6 +67,8 @@ int main(int argc, char **argv)
   DEV_Delay_ms(1000);
 
   lcdTestPattern();
+  DEV_Delay_ms(1000);
+  Clear_Screen();
   DEV_Delay_ms(1000);
   
   testlines();
@@ -87,6 +99,75 @@ int main(int argc, char **argv)
   
   DEV_Delay_ms(1000);
   return 0;
+}
+
+void buftest(void)
+{
+  int xpos = 30;
+  int ypos = 10;
+  int xvol = 3;
+  int yvol = 11;
+  int oldx = xpos, oldy = ypos;
+
+  for(int i = 0; i < 500; i++)
+  {
+    
+    DrawDot(xpos, ypos, WHITE);
+    DrawDot(oldx, oldy, BLACK);
+
+    oldx = xpos;
+    oldy = ypos;
+
+    SendScreenBuffer();
+    DEV_Delay_ms(50);
+
+
+    xpos += xvol;
+    ypos += yvol;
+
+    if(xpos >= 128 || xpos <= 0)
+    {
+      xvol = -xvol;
+    }
+
+    if(ypos >= 128 || ypos <= 0)
+    {
+      yvol = -yvol;
+    }
+  }
+
+  auto t1 = Clock::now();
+  int iter = 0;
+
+  for(int16_t c = 0; c < 0x100; c += 1)
+  {
+    for(int i = 0; i < 128; i++)
+    {
+      for(int j = 0; j < 128; j++)
+      {
+        int16_t cl = ((c & 0xFF) << 8) | (c >> 8);
+        SetPixel(i, j, cl);
+      }
+
+    }
+    SendScreenBuffer();
+    iter++;
+  }
+
+  auto t2 = Clock::now();
+  int totaltime = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
+  float rate = ((float)iter / ((float)totaltime / 1000.0f));
+
+  printf("Iter = %d, total time = %d, refresh rate/sec = %f\n", iter, totaltime, rate);
+}
+
+void DrawDot(int x, int y, int16_t color)
+{
+  SetPixel(x, y, color);
+  SetPixel(x + 1, y, color);
+  SetPixel(x - 1, y, color);
+  SetPixel(x, y + 1, color);
+  SetPixel(x, y - 1, color);
 }
 
 void testlines(void)  {
